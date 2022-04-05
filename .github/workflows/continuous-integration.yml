@@ -44,4 +44,4 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Run test suite
-        run: ./vendor/bin/phpunit
+        run: ./vendor/bin/phpunit ./vendor/bin/phpunit rules-tests
