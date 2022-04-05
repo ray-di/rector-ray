@@ -1,5 +1,5 @@
 {
-    "name": "bearsunday/rector-bearsunday",
+    "name": "ray/rector-ray",
     "type": "rector-extension",
     "license": "MIT",
     "description": "Rector upgrades rules for BEAR.Sunday Framework",
