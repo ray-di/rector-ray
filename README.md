@@ -1,4 +1,5 @@
 # Rector Rules for Ray.Di
+[![Continuous Integration](https://github.com/ray-di/rector-ray/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/ray-di/rector-ray/actions/workflows/continuous-integration.yml)
 
 The [rector/rector](http://github.com/rectorphp/rector) rules for Ray.Di.
 
