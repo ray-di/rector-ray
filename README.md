@@ -1,11 +1,11 @@
-# Rector Rules for BEAR.Sunday
+# Rector Rules for Ray.Di
 
-The [rector/rector](http://github.com/rectorphp/rector) rules for BEAR.Sunday.
+The [rector/rector](http://github.com/rectorphp/rector) rules for Ray.Di.
 
 ## Install
 
 ```bash
-composer require bearsunday/rector-bearsunday 1.x-dev --dev
+composer require ray/rector-ray 1.x-dev --dev
 ```
 
 ## Use Sets
@@ -13,7 +13,7 @@ composer require bearsunday/rector-bearsunday 1.x-dev --dev
 ```php
 <?php
 // rector.php
-use Rector\BearSunday\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector;
+use Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector;
 use Rector\Core\Configuration\Option;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 

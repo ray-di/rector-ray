@@ -2,7 +2,7 @@
 
 declare (strict_types=1);
 
-namespace Rector\BearSunday\RayDiNamedAnnotation\Rector\ClassMethod;
+namespace Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\ClassMethod;
