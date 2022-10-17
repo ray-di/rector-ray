@@ -4,24 +4,18 @@ declare(strict_types=1);
 
 namespace Rector\Tests\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector;
 
-use Iterator;
 use Rector\Testing\PHPUnit\AbstractRectorTestCase;
-use Symplify\SmartFileSystem\SmartFileInfo;
 
 final class RayDiNamedAnnotationRectorTest extends AbstractRectorTestCase
 {
-    /**
-     * @dataProvider provideData()
-     */
+    /** @dataProvider provideData() */
     public function test(string $filePath): void
     {
         $this->doTestFile($filePath);
     }
 
-    /**
-     * @return Iterator<<string>>
-     */
-    public function provideData(): \Iterator
+    /** @return Iterator<<string>> */
+    public function provideData(): Iterator
     {
         return $this->yieldFilesFromDirectory(__DIR__ . '/Fixture');
     }
