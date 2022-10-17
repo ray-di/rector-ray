@@ -69,7 +69,9 @@ CODE_SAMPLE
     }
 
     /**
-     * @return array<class-string<Node>>
+     * @return string[]
+     *
+     * @psalm-return array{0: ClassMethod::class}
      */
     public function getNodeTypes(): array
     {
@@ -78,6 +80,8 @@ CODE_SAMPLE
 
     /**
      * @param ClassMethod $node
+     *
+     * @return ClassMethod|null
      */
     public function refactor(Node $node): ?Node
     {
@@ -114,7 +118,7 @@ CODE_SAMPLE
     }
 
 
-    private function processNodeAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ?ClassMethod
+    private function processNodeAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ClassMethod
     {
         $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass(Named::class);
         if (!$doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
@@ -135,7 +139,7 @@ CODE_SAMPLE
         return $node;
     }
 
-    private function processQualiferAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ?ClassMethod
+    private function processQualiferAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ClassMethod
     {
         $nsParts = $node->getAttribute('parent')->namespacedName->parts;
         $class = implode('\\', $nsParts);
