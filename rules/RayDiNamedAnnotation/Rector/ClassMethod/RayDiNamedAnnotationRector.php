@@ -4,19 +4,27 @@ declare (strict_types=1);
 
 namespace Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\ClassMethod;
 use Ray\Di\Di\Named;
+use Ray\Di\Di\Qualifier;
 use Rector\BetterPhpDocParser\PhpDoc\DoctrineAnnotationTagValueNode;
+use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocManipulator\PhpDocTagRemover;
 use Rector\Core\Rector\AbstractRector;
 use Rector\PhpAttribute\NodeFactory\PhpAttributeGroupFactory;
+use ReflectionClass;
+use ReflectionMethod;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 use function array_merge;
 use function assert;
 use function explode;
+use function get_class;
+use function implode;
 use function is_string;
+use function property_exists;
 use function substr;
 use function trim;
 
@@ -25,10 +33,13 @@ use function trim;
  */
 final class RayDiNamedAnnotationRector extends AbstractRector
 {
+    private AnnotationReader $reader;
     public function __construct(
         private PhpAttributeGroupFactory $attributeGroupFactory,
         private PhpDocTagRemover $phpDocTagRemove
-    ){}
+    ){
+        $this->reader = new AnnotationReader();
+    }
 
     public function getRuleDefinition(): RuleDefinition
     {
@@ -71,10 +82,12 @@ CODE_SAMPLE
     public function refactor(Node $node): ?Node
     {
         assert($node instanceof ClassMethod);
+
         $phpDocInfo = $this->phpDocInfoFactory->createFromNodeOrEmpty($node);
         $namedNode = $this->processNodeAnnotation($phpDocInfo, $node);
+        $qualifierNode = $this->processQualiferAnnotation($phpDocInfo, $namedNode);
 
-        return $namedNode;
+        return $qualifierNode;
     }
 
     /**
@@ -100,7 +113,8 @@ CODE_SAMPLE
         return $names;
     }
 
-    private function processNodeAnnotation(\Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo $phpDocInfo, ClassMethod $node): ?ClassMethod
+
+    private function processNodeAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ?ClassMethod
     {
         $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass(Named::class);
         if (!$doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
@@ -115,6 +129,35 @@ CODE_SAMPLE
             }
             $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClassWithItems(Named::class, [$names[$varName]]);
             $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
+
+            $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
+        }
+        return $node;
+    }
+
+    private function processQualiferAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ?ClassMethod
+    {
+        $nsParts = $node->getAttribute('parent')->namespacedName->parts;
+        $class = implode('\\', $nsParts);
+        $annotations = $this->reader->getMethodAnnotations(new ReflectionMethod($class, $node->name->name));
+        $named = [];
+        foreach ($annotations as $annotation) {
+            $qualifier = $this->reader->getClassAnnotation(new ReflectionClass($annotation), Qualifier::class);
+            if ($qualifier instanceof Qualifier && property_exists($annotation, 'value')) {
+                assert(property_exists($annotation, 'value'));
+                $named[$annotation->value] = get_class($annotation);
+            }
+        }
+        foreach ($node->params as $param) {
+            $varName = $param->var->name;
+            if (!isset($named[$varName])) {
+                continue;
+            }
+            $qualifier = $named[$varName];
+            $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClass($qualifier);
+            $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
+
+            $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass($qualifier);
 
             $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
         }
