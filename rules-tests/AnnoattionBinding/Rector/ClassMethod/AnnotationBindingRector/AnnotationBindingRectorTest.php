@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Rector\Tests\AnnoattionBinding\Rector\ClassMethod;
+namespace Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector;
 
 use Iterator;
 use Rector\Testing\PHPUnit\AbstractRectorTestCase;
-use Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fake\Foo;
-use Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fake\NoneNamed;
-use Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fake\SomeClass;
+use Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fixture\Foo;
+use Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fixture\NoneNamed;
+use Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fixture\SomeClass;
 
 use function class_exists;
 
