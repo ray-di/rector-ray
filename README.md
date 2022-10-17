@@ -6,38 +6,33 @@ The [rector/rector](http://github.com/rectorphp/rector) rules for Ray.Di.
 ## Install
 
 ```bash
-composer require ray/rector-ray 1.x-dev --dev
+composer require ray/rector-ray --dev
 ```
-
-## Use Sets
-
-```php
-<?php
-// rector.php
-use Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector;
-use Rector\Core\Configuration\Option;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-
-require __DIR__ . '/vendor/autoload.php';
-
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $services = $containerConfigurator->services();
-    $parameters = $containerConfigurator->parameters();
-    $parameters->set(Option::AUTO_IMPORT_NAMES, true);
-
-    $services->set(RayDiNamedAnnotationRector::class);
-};
-```
-
-See [Auto Import Names](https://github.com/rectorphp/rector/blob/main/docs/auto_import_names.md) for `Option::AUTO_IMPORT_NAME`.
 
 ## Rules
 
-### RayDiNamedAnnotationRector
+### AnnotationBindingRector
 
-Change `@Named` annotation in method to `#[Named]` attribute in parameter.
+This Rector converts annotation bindings in PHPDoc into parameter attribute bindings.
 
-- class: [`RayDiNamedAnnotationRector`](rules/RayDiNamedAnnotation/Rector/ClassMethod/RayDiNamedAnnotationRector.php)
+:wrench: **configure it!**
+
+- class: [`AnnotationBindingRector`](rules/AnnotationBinding/Rector/ClassMethod/AnnotationBindingRector.php)
+
+```php
+use PHPStan\Type\ObjectType;
+use Rector\Arguments\Rector\ClassMethod\ArgumentAdderRector;
+use Rector\Arguments\ValueObject\ArgumentAdder;
+use Rector\Config\RectorConfig;
+
+return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->ruleWithConfiguration(
+        AnnotationBindingRector::class
+    );
+};
+```
+
+↓
 
 ```diff
 class SomeClass
@@ -48,6 +43,16 @@ class SomeClass
      */
 -    public function __construct(int $a, int $b)
 +    public function __construct(#[Named('foo')] int $a, #[Named('bar')] int $b)
+    {
+    }
+```
+
+```diff
+-    /**
+-     * @Foo("a")
+-     */
+-    public function __construct(int $a, int $b)
++    public function __construct(#[Foo] int $a, int $b)
     {
     }
 ```

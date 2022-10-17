@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Rector\Config\RectorConfig;
-use Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod\AnnotationBindingRector;
+namespace RectorPrefix20220323;
 
-require __DIR__ . '/vendor/autoload.php';
+use Rector\Config\RectorConfig;
+use Rector\Ray\AnnotationBinding\Rector\ClassMethod\AnnotationBindingRector;
 
 return static function (RectorConfig $config): void {
     $services = $config->services();
