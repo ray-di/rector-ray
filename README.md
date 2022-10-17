@@ -35,9 +35,9 @@ See [Auto Import Names](https://github.com/rectorphp/rector/blob/main/docs/auto_
 
 ### RayDiNamedAnnotationRector
 
-Change `@Named` annotation in method to `#[Named]` attribute in parameter.
-
 - class: [`RayDiNamedAnnotationRector`](rules/RayDiNamedAnnotation/Rector/ClassMethod/RayDiNamedAnnotationRector.php)
+
+`@Named` annotation is converted to `#[Named]` attribute.
 
 ```diff
 class SomeClass
@@ -48,6 +48,18 @@ class SomeClass
      */
 -    public function __construct(int $a, int $b)
 +    public function __construct(#[Named('foo')] int $a, #[Named('bar')] int $b)
+    {
+    }
+```
+
+`Qualifier` are also converted.
+
+```diff
+-    /**
+-     * @Foo("a")
+-     */
+-    public function __construct(int $a, int $b)
++    public function __construct(#[Foo] int $a, int $b)
     {
     }
 ```
