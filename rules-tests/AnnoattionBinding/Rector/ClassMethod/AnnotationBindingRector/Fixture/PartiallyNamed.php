@@ -1,6 +1,8 @@
 <?php
 
-namespace Rector\Tests\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector\Fixture;
+declare(strict_types=1);
+
+namespace Rector\Tests\AnnoattionBinding\Rector\ClassMethod\AnnotationBindingRector\Fixture;
 
 use Ray\Di\Di\Named;
 

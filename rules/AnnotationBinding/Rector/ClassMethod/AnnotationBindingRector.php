@@ -2,7 +2,7 @@
 
 declare (strict_types=1);
 
-namespace Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod;
+namespace Rector\Ray\AnnotationBinding\Rector\ClassMethod;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use PhpParser\Node;
@@ -28,10 +28,7 @@ use function property_exists;
 use function substr;
 use function trim;
 
-/**
- * @see \Rector\Tests\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector\RayDiNamedAnnotationRectorTest
- */
-final class RayDiNamedAnnotationRector extends AbstractRector
+final class AnnotationBindingRector extends AbstractRector
 {
     private AnnotationReader $reader;
     public function __construct(

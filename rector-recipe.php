@@ -14,9 +14,9 @@ return static function (\Symfony\Component\DependencyInjection\Loader\Configurat
     $rectorRecipeConfiguration = [
         // [RECTOR CORE CONTRIBUTION - REQUIRED]
         // package name, basically namespace part in `rules/<package>/src`, use PascalCase
-        \Rector\RectorGenerator\ValueObject\Option::PACKAGE => 'RayDiNamedAnnotation',
+        \Rector\RectorGenerator\ValueObject\Option::PACKAGE => 'AnnotationBinding',
         // name, basically short class name; use PascalCase
-        \Rector\RectorGenerator\ValueObject\Option::NAME => 'RayDiNamedAnnotationRector',
+        \Rector\RectorGenerator\ValueObject\Option::NAME => 'AnnotationBindingRector',
         // 1+ node types to change, pick from classes here https://github.com/nikic/PHP-Parser/tree/master/lib/PhpParser/Node
         // the best practise is to have just 1 type here if possible, and make separated rule for other node types
         \Rector\RectorGenerator\ValueObject\Option::NODE_TYPES => [ \PhpParser\Node\Stmt\ClassMethod::class],

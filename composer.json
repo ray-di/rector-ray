@@ -16,8 +16,7 @@
     "autoload-dev": {
         "psr-4": {
             "Rector\\Tests\\": "rules-tests/",
-            "Rector\\Ray\\RayDiNamedAnnotation\\Rector\\ClassMethod\\": "rules-tests/",
-            "Rector\\Tests\\RayDiNamedAnnotation\\Rector\\ClassMethod\\RayDiNamedAnnotationRector\\Fixture\\": "rules-tests/RayDiNamedAnnotation/Rector/ClassMethod/RayDiNamedAnnotationRector/Fake/"
+            "Rector\\Ray\\AnnotationBinding\\Rector\\ClassMethod\\": "rules-tests/"
         }
     },
     "minimum-stability": "dev",
