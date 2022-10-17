@@ -147,10 +147,7 @@ CODE_SAMPLE
         $named = [];
         foreach ($annotations as $annotation) {
             $qualifier = $this->reader->getClassAnnotation(new ReflectionClass($annotation), Qualifier::class);
-            if ($qualifier instanceof Qualifier && property_exists($annotation, 'value')) {
-                assert(property_exists($annotation, 'value'));
-                $named[$annotation->value] = get_class($annotation);
-            }
+            $named = $this->getNamed($qualifier, $annotation, $named, $node->params);
         }
         foreach ($node->params as $param) {
             $varName = $param->var->name;
@@ -162,9 +159,33 @@ CODE_SAMPLE
             $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
 
             $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass($qualifier);
-
-            $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
+            if ($doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
+                $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
+            }
         }
         return $node;
+    }
+
+    /**
+     * @param array<Node\Param> $params
+     */
+    private function getNamed(mixed $qualifier, object $annotation, array $named, array $params)
+    {
+        if (! $qualifier instanceof Qualifier) {
+            return $named;
+        }
+        $annotationClass = get_class($annotation);
+        if (property_exists($annotation, 'value')) {
+            assert(property_exists($annotation, 'value'));
+            $named[$annotation->value] = $annotationClass;
+
+            return $named;
+        }
+
+        foreach ($params as $param) {
+            $named[$param->var->name] = $annotationClass;
+        }
+
+        return $named;
     }
 }
