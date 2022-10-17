@@ -10,7 +10,7 @@ use Ray\Di\Di\Named;
 use Rector\BetterPhpDocParser\PhpDoc\DoctrineAnnotationTagValueNode;
 use Rector\BetterPhpDocParser\PhpDocManipulator\PhpDocTagRemover;
 use Rector\Core\Rector\AbstractRector;
-use Rector\PhpAttribute\Printer\PhpAttributeGroupFactory;
+use Rector\PhpAttribute\NodeFactory\PhpAttributeGroupFactory;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 use function array_merge;
@@ -72,24 +72,9 @@ CODE_SAMPLE
     {
         assert($node instanceof ClassMethod);
         $phpDocInfo = $this->phpDocInfoFactory->createFromNodeOrEmpty($node);
-        $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass(Named::class);
-        if (! $doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
-            return null;
-        }
-        $nameString = $doctrineTagValueNode->getValuesWithExplicitSilentAndWithoutQuotes()[0];
-        $names = $this->parseName($nameString);
-        foreach ($node->params as $param) {
-            $varName = $param->var->name;
-            if (! isset($names[$varName])) {
-                continue;
-            }
-            $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClassWithItems(Named::class, [$names[$varName]]);
-            $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
+        $namedNode = $this->processNodeAnnotation($phpDocInfo, $node);
 
-            $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
-        }
-
-        return $node;
+        return $namedNode;
     }
 
     /**
@@ -113,5 +98,26 @@ CODE_SAMPLE
         }
 
         return $names;
+    }
+
+    private function processNodeAnnotation(\Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo $phpDocInfo, ClassMethod $node): ?ClassMethod
+    {
+        $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass(Named::class);
+        if (!$doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
+            return $node;
+        }
+        $nameString = $doctrineTagValueNode->getValuesWithSilentKey()[0]->value;
+        $names = $this->parseName($nameString);
+        foreach ($node->params as $param) {
+            $varName = $param->var->name;
+            if (!isset($names[$varName])) {
+                continue;
+            }
+            $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClassWithItems(Named::class, [$names[$varName]]);
+            $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
+
+            $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
+        }
+        return $node;
     }
 }
