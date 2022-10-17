@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rector\Tests\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector;
 
+use Iterator;
 use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 
 final class RayDiNamedAnnotationRectorTest extends AbstractRectorTestCase
@@ -14,7 +15,9 @@ final class RayDiNamedAnnotationRectorTest extends AbstractRectorTestCase
         $this->doTestFile($filePath);
     }
 
-    /** @return Iterator<<string>> */
+    /**
+     * @return Iterator<<string>>
+     */
     public function provideData(): Iterator
     {
         return $this->yieldFilesFromDirectory(__DIR__ . '/Fixture');
