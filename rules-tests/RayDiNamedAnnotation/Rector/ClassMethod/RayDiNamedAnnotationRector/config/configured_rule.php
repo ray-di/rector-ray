@@ -3,8 +3,10 @@
 declare (strict_types=1);
 namespace RectorPrefix20220323;
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-return static function (\Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator $containerConfigurator) : void {
-    $services = $containerConfigurator->services();
-    $services->set(\Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector::class);
+use Rector\Config\RectorConfig;
+use Rector\Ray\RayDiNamedAnnotation\Rector\ClassMethod\RayDiNamedAnnotationRector;
+
+return static function (RectorConfig $config) : void {
+    $services = $config->services();
+    $services->set(RayDiNamedAnnotationRector::class);
 };
