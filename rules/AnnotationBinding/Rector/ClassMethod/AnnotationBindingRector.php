@@ -139,6 +139,9 @@ CODE_SAMPLE
     private function processQualiferAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ClassMethod
     {
         $nsParts = $node->getAttribute('parent')->namespacedName->parts;
+        if ($nsParts === null) {
+            return $node;
+        }
         $class = implode('\\', $nsParts);
         $annotations = $this->reader->getMethodAnnotations(new ReflectionMethod($class, $node->name->name));
         $named = [];
