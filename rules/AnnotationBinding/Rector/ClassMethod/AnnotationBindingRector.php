@@ -23,8 +23,10 @@ use function assert;
 use function explode;
 use function get_class;
 use function implode;
+use function is_array;
 use function is_string;
 use function property_exists;
+use function str_contains;
 use function substr;
 use function trim;
 
@@ -122,6 +124,14 @@ CODE_SAMPLE
             return $node;
         }
         $nameString = $doctrineTagValueNode->getValuesWithSilentKey()[0]->value;
+        if (str_contains($nameString, '=')){
+            return $this->convertEqualStringNamed($nameString, $node, $phpDocInfo, $doctrineTagValueNode);
+        }
+        return $this->convertSingleStringName($node, $nameString, $phpDocInfo, $doctrineTagValueNode);
+    }
+
+    private function convertEqualStringNamed(mixed $nameString, ClassMethod $node, PhpDocInfo $phpDocInfo, DoctrineAnnotationTagValueNode $doctrineTagValueNode): ClassMethod
+    {
         $names = $this->parseName($nameString);
         foreach ($node->params as $param) {
             $varName = $param->var->name;
@@ -135,6 +145,17 @@ CODE_SAMPLE
         }
         return $node;
     }
+
+    private function convertSingleStringName(ClassMethod $node, mixed $nameString, PhpDocInfo $phpDocInfo, DoctrineAnnotationTagValueNode $doctrineTagValueNode): ClassMethod
+    {
+        $firstParam = $node->params[0];
+        $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClassWithItems(Named::class, [$nameString]);
+        $firstParam->attrGroups = array_merge($firstParam->attrGroups, [$attrGroupsFromNamedAnnotation]);
+        $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
+
+        return $node;
+    }
+
 
     private function processQualiferAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ClassMethod
     {
