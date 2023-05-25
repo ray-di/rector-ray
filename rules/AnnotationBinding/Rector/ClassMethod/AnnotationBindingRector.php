@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace Rector\Ray\AnnotationBinding\Rector\ClassMethod;
 
@@ -16,7 +16,7 @@ use Rector\Core\Rector\AbstractRector;
 use Rector\PhpAttribute\NodeFactory\PhpAttributeGroupFactory;
 use ReflectionClass;
 use ReflectionMethod;
-use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
+
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 use function array_merge;
 use function assert;
@@ -25,6 +25,7 @@ use function get_class;
 use function implode;
 use function is_string;
 use function property_exists;
+use function str_contains;
 use function substr;
 use function trim;
 
@@ -34,7 +35,7 @@ final class AnnotationBindingRector extends AbstractRector
     public function __construct(
         private PhpAttributeGroupFactory $attributeGroupFactory,
         private PhpDocTagRemover $phpDocTagRemove
-    ){
+    ) {
         $this->reader = new AnnotationReader();
     }
 
@@ -67,7 +68,6 @@ CODE_SAMPLE
 
     /**
      * @return string[]
-     *
      * @psalm-return array{0: ClassMethod::class}
      */
     public function getNodeTypes(): array
@@ -86,14 +86,11 @@ CODE_SAMPLE
 
         $phpDocInfo = $this->phpDocInfoFactory->createFromNodeOrEmpty($node);
         $namedNode = $this->processNodeAnnotation($phpDocInfo, $node);
-        $qualifierNode = $this->processQualiferAnnotation($phpDocInfo, $namedNode);
 
-        return $qualifierNode;
+        return $this->processQualiferAnnotation($phpDocInfo, $namedNode);
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     private function parseName(string $name): array
     {
         $names = [];
@@ -114,25 +111,46 @@ CODE_SAMPLE
         return $names;
     }
 
-
     private function processNodeAnnotation(PhpDocInfo $phpDocInfo, ClassMethod $node): ClassMethod
     {
         $doctrineTagValueNode = $phpDocInfo->getByAnnotationClass(Named::class);
-        if (!$doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
+        if (! $doctrineTagValueNode instanceof DoctrineAnnotationTagValueNode) {
             return $node;
         }
+
         $nameString = $doctrineTagValueNode->getValuesWithSilentKey()[0]->value;
+        if (str_contains($nameString, '=')) {
+            return $this->convertEqualStringNamed($nameString, $node, $phpDocInfo, $doctrineTagValueNode);
+        }
+
+        return $this->convertSingleStringName($node, $nameString, $phpDocInfo, $doctrineTagValueNode);
+    }
+
+    private function convertEqualStringNamed(mixed $nameString, ClassMethod $node, PhpDocInfo $phpDocInfo, DoctrineAnnotationTagValueNode $doctrineTagValueNode): ClassMethod
+    {
         $names = $this->parseName($nameString);
         foreach ($node->params as $param) {
             $varName = $param->var->name;
-            if (!isset($names[$varName])) {
+            if (! isset($names[$varName])) {
                 continue;
             }
+
             $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClassWithItems(Named::class, [$names[$varName]]);
             $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
 
             $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
         }
+
+        return $node;
+    }
+
+    private function convertSingleStringName(ClassMethod $node, mixed $nameString, PhpDocInfo $phpDocInfo, DoctrineAnnotationTagValueNode $doctrineTagValueNode): ClassMethod
+    {
+        $firstParam = $node->params[0];
+        $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClassWithItems(Named::class, [$nameString]);
+        $firstParam->attrGroups = array_merge($firstParam->attrGroups, [$attrGroupsFromNamedAnnotation]);
+        $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
+
         return $node;
     }
 
@@ -142,6 +160,7 @@ CODE_SAMPLE
         if ($nsParts === null) {
             return $node;
         }
+
         $class = implode('\\', $nsParts);
         $annotations = $this->reader->getMethodAnnotations(new ReflectionMethod($class, $node->name->name));
         $named = [];
@@ -149,11 +168,13 @@ CODE_SAMPLE
             $qualifier = $this->reader->getClassAnnotation(new ReflectionClass($annotation), Qualifier::class);
             $named = $this->getNamed($qualifier, $annotation, $named, $node->params);
         }
+
         foreach ($node->params as $param) {
             $varName = $param->var->name;
-            if (!isset($named[$varName])) {
+            if (! isset($named[$varName])) {
                 continue;
             }
+
             $qualifier = $named[$varName];
             $attrGroupsFromNamedAnnotation = $this->attributeGroupFactory->createFromClass($qualifier);
             $param->attrGroups = array_merge($param->attrGroups, [$attrGroupsFromNamedAnnotation]);
@@ -163,17 +184,17 @@ CODE_SAMPLE
                 $this->phpDocTagRemove->removeTagValueFromNode($phpDocInfo, $doctrineTagValueNode);
             }
         }
+
         return $node;
     }
 
-    /**
-     * @param array<Node\Param> $params
-     */
+    /** @param array<Node\Param> $params */
     private function getNamed(mixed $qualifier, object $annotation, array $named, array $params)
     {
         if (! $qualifier instanceof Qualifier) {
             return $named;
         }
+
         $annotationClass = get_class($annotation);
         if (property_exists($annotation, 'value')) {
             assert(property_exists($annotation, 'value'));
