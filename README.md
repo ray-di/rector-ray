@@ -20,16 +20,13 @@ This Rector converts annotation bindings in PHPDoc into parameter attribute bind
 - class: [`AnnotationBindingRector`](rules/AnnotationBinding/Rector/ClassMethod/AnnotationBindingRector.php)
 
 ```php
-use PHPStan\Type\ObjectType;
-use Rector\Arguments\Rector\ClassMethod\ArgumentAdderRector;
-use Rector\Arguments\ValueObject\ArgumentAdder;
 use Rector\Config\RectorConfig;
+use Rector\Ray\AnnotationBinding\Rector\ClassMethod\AnnotationBindingRector;
 
 return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->ruleWithConfiguration(
-        AnnotationBindingRector::class
-    );
+    $rectorConfig->rule(AnnotationBindingRector::class);
 };
+
 ```
 
 ↓
